@@ -32,39 +32,54 @@ pnpm add anq-modal-form
 
 ```vue
 <template>
-  <anq-modal-form
-    v-model="isOpen"
-    :form-schema="formSchema"
-    @submit="handleSubmit"
-  />
+  <div>
+    <q-btn 
+      label="Open Form" 
+      color="primary" 
+      @click="modalRef?.show()" 
+    />
+    
+    <AnqModalForm
+      ref="modalRef"
+      title="Form Title"
+      @submit="onSubmit"
+      @hide="onModalHide"
+    >
+      <template #content>
+        <div class="q-pa-md">
+          <q-form @submit="onSubmit" class="q-gutter-md">
+            <q-input
+              v-model="formData.field1"
+              label="Field 1"
+              :rules="[val => !!val || 'Field is required']"
+              outlined
+            />
+            <!-- Add more form fields as needed -->
+          </q-form>
+        </div>
+      </template>
+    </AnqModalForm>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { AnqModalForm } from 'anq-modal-form'
+import { ref, reactive } from 'vue';
+import { AnqModalForm } from 'anq-modal-form';
 
-const isOpen = ref(false)
+const modalRef = ref<InstanceType<typeof AnqModalForm> | null>(null);
 
-const formSchema = {
-  fields: [
-    {
-      name: 'username',
-      label: 'Username',
-      type: 'text',
-      required: true
-    },
-    {
-      name: 'email',
-      label: 'Email',
-      type: 'email',
-      required: true
-    }
-  ]
-}
+const formData = reactive({
+  field1: ''
+});
 
-const handleSubmit = (formData) => {
-  console.log('Form submitted:', formData)
-}
+const onSubmit = () => {
+  console.log('Form submitted:', formData);
+  modalRef.value?.hide();
+};
+
+const onModalHide = () => {
+  console.log('Modal hidden');
+};
 </script>
 ```
 
@@ -72,93 +87,79 @@ const handleSubmit = (formData) => {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| modelValue | Boolean | false | Controls modal visibility |
-| formSchema | Object | {} | Form configuration object |
-| title | String | 'Form' | Modal title |
-| width | String | '500px' | Modal width |
-| persistent | Boolean | false | Prevents closing on outside click |
-| noEscDismiss | Boolean | false | Prevents closing on ESC key |
-| noBackdropDismiss | Boolean | false | Prevents closing on backdrop click |
+| isLoading | Boolean | false | Shows loading state on the submit button |
+| formIsLoading | Boolean | false | Shows loading state on the form |
+| okLabel | String | 'Ok' | Label for the submit button |
+| cancelLabel | String | 'Cancel' | Label for the cancel button |
+| title | String | 'Title' | Modal title |
+| btnsColor | QBtnProps['color'] | 'primary' | Color for the buttons |
+| modalCardProps | { class?: string; style?: string } & QCard['$props'] | undefined | Additional props for the q-card component |
 
 ## Events
 
 | Event | Parameters | Description |
 |-------|------------|-------------|
-| submit | (formData: Object) | Emitted when form is submitted |
-| cancel | () | Emitted when form is cancelled |
-| update:modelValue | (value: Boolean) | Emitted when modal visibility changes |
+| submit | () | Emitted when form is submitted |
+| hide | () | Emitted when modal is hidden |
 
-## Form Schema
+## Slots
 
-The form schema is an object that defines the structure and behavior of your form:
-
-```typescript
-interface FormSchema {
-  fields: Array<{
-    name: string
-    label: string
-    type: string
-    required?: boolean
-    validation?: Object
-    options?: Array<{ label: string, value: any }>
-    // ... other field properties
-  }>
-  // ... other form properties
-}
-```
+| Slot | Props | Description |
+|------|-------|-------------|
+| content | - | Main content of the modal |
+| close-icon-btn | color, disable | Custom close button |
+| cancel-btn | color, disable, label | Custom cancel button |
+| ok-btn | color, label, disable, loading | Custom submit button |
 
 ## Examples
 
-### Basic Form
+### Basic Form with Validation
 ```vue
 <template>
-  <anq-modal-form
-    v-model="isOpen"
-    :form-schema="basicForm"
-    @submit="handleSubmit"
-  />
+  <AnqModalForm
+    ref="modalRef"
+    title="User Registration"
+    @submit="onSubmit"
+  >
+    <template #content>
+      <div class="q-pa-md">
+        <q-form @submit="onSubmit" class="q-gutter-md">
+          <q-input
+            v-model="formData.email"
+            label="Email"
+            type="email"
+            :rules="[
+              val => !!val || 'Email is required',
+              val => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || 'Invalid email format'
+            ]"
+            outlined
+          />
+        </q-form>
+      </div>
+    </template>
+  </AnqModalForm>
 </template>
-
-<script setup>
-const basicForm = {
-  fields: [
-    {
-      name: 'name',
-      label: 'Name',
-      type: 'text',
-      required: true
-    }
-  ]
-}
-</script>
 ```
 
-### Form with Validation
+### Form with Custom Buttons
 ```vue
 <template>
-  <anq-modal-form
-    v-model="isOpen"
-    :form-schema="validatedForm"
-    @submit="handleSubmit"
-  />
+  <AnqModalForm
+    ref="modalRef"
+    title="Custom Form"
+    @submit="onSubmit"
+  >
+    <template #ok-btn="{ color, label, disable, loading }">
+      <q-btn
+        :color="color"
+        :label="label"
+        :disable="disable"
+        :loading="loading"
+        icon="check"
+      />
+    </template>
+  </AnqModalForm>
 </template>
-
-<script setup>
-const validatedForm = {
-  fields: [
-    {
-      name: 'email',
-      label: 'Email',
-      type: 'email',
-      required: true,
-      validation: {
-        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-        message: 'Please enter a valid email'
-      }
-    }
-  ]
-}
-</script>
 ```
 
 ## Contributing
