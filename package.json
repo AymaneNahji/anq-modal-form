@@ -1,6 +1,6 @@
 {
   "name": "anq-modal-form",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "A powerful, customizable modal form component for Quasar Framework and Vue 3 applications. Features include responsive design, dynamic form generation, validation, animations, and seamless integration with Quasar's design system.",
   "type": "module",
   "main": "./dist/anq-modal-form.umd.cjs",
