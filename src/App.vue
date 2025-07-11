@@ -14,14 +14,14 @@
     <AnqModalForm
       ref="modalRef"
       title="User Registration"
-      :persistent="true"
       @submit="onSubmit"
       @hide="onModalHide"
+      :form-props="{
+        greedy: true,
+      }"
     >
       <template #content>
-        <div class="q-pa-md">
-          <q-form @submit="onSubmit" class="q-gutter-md">
-            <div class="row q-col-gutter-md">
+        <div class="row q-col-gutter-md">
               <div class="col-12 col-md-6">
                 <q-input
                   v-model="formData.firstName"
@@ -73,10 +73,8 @@
             <q-toggle
               v-model="formData.terms"
               label="I agree to the terms and conditions"
-              :rules="[val => val || 'You must accept the terms']"
+              :rules="[(val:any) => val || 'You must accept the terms']"
             />
-          </q-form>
-        </div>
       </template>
     </AnqModalForm>
   </div>
@@ -89,13 +87,22 @@ import { AnqModalForm } from './index';
 const modalRef = ref<InstanceType<typeof AnqModalForm> | null>(null);
 
 const formData = reactive({
-  firstName: 'John',
-  lastName: 'Doe',
-  email: 'john.doe@example.com',
-  role: 'user',
-  password: 'SecurePass123!',
-  terms: true
+  firstName: '',
+  lastName: '',
+  email: '',
+  role: '',
+  password: '',
+  terms: false
 });
+
+// const formData = reactive({
+//   firstName: 'John',
+//   lastName: 'Doe',
+//   email: 'john.doe@example.com',
+//   role: 'user',
+//   password: 'SecurePass123!',
+//   terms: true
+// });
 
 const roleOptions = [
   { label: 'Admin', value: 'admin' },
@@ -105,13 +112,13 @@ const roleOptions = [
 
 const onSubmit = () => {
   console.log('Form submitted:', formData);
-  alert('Form submitted');
-  modalRef.value?.hide();
+  // alert('Form submitted');
+  // modalRef.value?.hide();
 };
 
 const onModalHide = () => {
   // Reset form data when modal is closed
-  Object.keys(formData).forEach(key => {
+  (Object.keys(formData) as Array<keyof typeof formData>).forEach((key) => {
     if (key === 'terms') {
       formData[key] = false;
     } else {

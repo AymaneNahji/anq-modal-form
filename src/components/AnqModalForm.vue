@@ -7,7 +7,7 @@
                     <q-btn icon="close" :color="props.btnsColor" round flat v-close-popup :disable="props.isLoading || props.formIsLoading" />
                 </slot>
             </q-card-section>
-            <q-form @submit="e=>emit('submit',e)" class="flex flex-col">
+            <q-form v-bind="props.formProps" @submit="e=>emit('submit',e)" @validation-error="e=>emit('validation-error',e)" @validation-success="()=>emit('validation-success')" class="flex flex-col">
                 <q-card-section class="flex flex-col gap-2">
                     <slot name="content"></slot>
                 </q-card-section>
@@ -26,11 +26,13 @@
 </template>
 
 <script setup lang="ts">
-import { QBtnProps, QCard } from 'quasar';
-import { reactive } from 'vue';
+import { QBtnProps, QCard, QForm } from 'quasar';
+import { Component, reactive } from 'vue';
 
 const emit = defineEmits<{
     (event:'submit',evt: Event | SubmitEvent):void;
+    (event:'validation-error',c: Component):void;
+    (event:'validation-success'):void;
     (event:'hide'):void;
 }>()
 
@@ -61,6 +63,10 @@ const props = defineProps({
     },
     modalCardProps:{
         type: Object as ()=>({class?:string;style?:string}&InstanceType<typeof QCard>['$props']),
+        required: false,
+    },
+    formProps:{
+        type: Object as ()=>({class?:string;style?:string}&InstanceType<typeof QForm>['$props']),
         required: false,
     }
 })
